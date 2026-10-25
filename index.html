@@ -283,6 +283,43 @@
   }
   .send.stop::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--panel-2); z-index: -1; }
 
+  /* ---------- Illustrations ---------- */
+  .illus { margin: 16px 0 2px; width: 100%; max-width: 40em; animation: blk-in .6s ease-out both; }
+  .illus-frame {
+    position: relative; display: block; width: 100%; padding: 0; margin: 0; cursor: zoom-in;
+    border: 1px solid rgba(214,180,110,.35); border-radius: 16px; overflow: hidden; background: #120f17;
+    aspect-ratio: 16 / 10; box-shadow: 0 14px 34px rgba(0,0,0,.5);
+  }
+  .illus-frame::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), inset 0 0 70px rgba(10,5,20,.55);
+    background: linear-gradient(180deg, rgba(10,6,18,0) 55%, rgba(10,6,18,.38));
+  }
+  .illus img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.05); transition: opacity .9s ease, transform 1.6s cubic-bezier(.2,.7,.2,1); }
+  .illus.loaded img { opacity: 1; transform: none; }
+  .illus figcaption { display: flex; flex-direction: column; gap: 3px; padding: 8px 4px 0; }
+  .illus .cap { font-family: var(--story-font); font-style: italic; font-size: 15px; line-height: 1.45; color: #ddd3ea; }
+  .illus .credit { font: 11px/1.4 var(--ui-font); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .illus.loading .illus-frame {
+    display: grid; place-items: center; cursor: default;
+    background: linear-gradient(110deg, #15111c 30%, #241c30 50%, #15111c 70%); background-size: 250% 100%; animation: shimmer 1.7s linear infinite;
+  }
+  .illus-ph { display: flex; align-items: center; gap: 10px; color: #b4abc2; font: 13px/1.3 var(--ui-font); padding: 0 16px; text-align: left; }
+  .lightbox {
+    position: fixed; left: 0; right: 0; top: var(--vvt); height: var(--vvh); z-index: 80; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center;
+    padding: max(56px, calc(var(--sat) + 46px)) max(14px, var(--sar)) max(16px, var(--sab)) max(14px, var(--sal));
+    background: rgba(6,4,10,.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  .lightbox.open { display: flex; animation: app-in .25s ease-out both; }
+  .lightbox img { max-width: 100%; max-height: calc(100% - 150px); object-fit: contain; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+  .lb-close { position: absolute; top: max(8px, var(--sat)); right: max(8px, var(--sar)); }
+  .lb-cap { font-family: var(--story-font); font-style: italic; font-size: 16px; color: #e3d9ef; max-width: 640px; }
+  .lb-cap:empty { display: none; }
+  .lb-credit { font-size: 12px; color: var(--muted); max-width: 640px; line-height: 1.45; }
+  .lb-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+  .lb-actions a.btn { text-decoration: none; }
+
   /* ---------- Mise en page du récit ---------- */
   .msg.assistant .bubble { max-width: 40em; hyphens: auto; -webkit-hyphens: auto; text-wrap: pretty; }
   .bubble .dq { color: var(--accent); font-weight: 600; margin-right: .08em; }
@@ -491,14 +528,14 @@
   .motes i {
     position: absolute; bottom: -10px; width: 3px; height: 3px; border-radius: 50%;
     background: #e8dcff; box-shadow: 0 0 8px 1px rgba(200,170,255,.9); opacity: 0;
-    animation: mote linear infinite;
+    animation: mote linear infinite; will-change: transform, opacity;
   }
   @keyframes mote {
     0% { transform: translate(0, 0); opacity: 0; }
     15% { opacity: .9; }
     100% { transform: translate(var(--dx, 20px), calc(-1 * var(--vvh, 100vh) - 20px)); opacity: 0; }
   }
-  .gate-inner { margin: auto; width: 100%; display: flex; justify-content: center; padding: 6px 0; }
+  .gate-inner { margin: auto; width: 100%; display: flex; justify-content: center; padding: 6px 0; -webkit-transform: translateZ(0); transform: translateZ(0); }
 
   .book { position: relative; width: min(100%, 410px); perspective: 2000px; }
   /* tranche des pages visible à droite et en bas */
@@ -544,8 +581,9 @@
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 -30px 60px rgba(0,0,0,.45);
   }
   /* grain du cuir */
+  .cover-head { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .cover-front::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: overlay;
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .07;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   /* dos du livre */
@@ -573,8 +611,8 @@
   .emblem .ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(214,180,110,.55); }
   .emblem .ring.runes { inset: 6px; border: 1px dashed rgba(214,180,110,.5); animation: spin 40s linear infinite; }
   .emblem .ring.inner { inset: 15px; border-color: rgba(208,186,255,.35); box-shadow: 0 0 22px rgba(160,120,255,.35), inset 0 0 14px rgba(160,120,255,.3); }
-  .emblem svg { width: 28px; height: 28px; color: #f1e6ff; filter: drop-shadow(0 0 10px rgba(200,170,255,.9)); animation: star-pulse 3.2s ease-in-out infinite; }
-  @keyframes star-pulse { 50% { transform: scale(.86); filter: drop-shadow(0 0 16px rgba(200,170,255,1)); } }
+  .emblem svg { width: 28px; height: 28px; color: #f1e6ff; filter: drop-shadow(0 0 10px rgba(200,170,255,.9)); animation: star-pulse 3.2s ease-in-out infinite; will-change: transform; }
+  @keyframes star-pulse { 50% { transform: scale(.84); opacity: .85; } }
   .cover-title {
     position: relative; z-index: 2; margin: 0; font-family: var(--story-font); font-weight: 600; font-size: 36px; line-height: 1.05; letter-spacing: .03em;
     background: linear-gradient(180deg, #fff7e6 0%, #e9cf96 55%, #b98f45 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -615,39 +653,92 @@
     display: grid; place-items: center;
   }
   .clasp::before { content: ""; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: rgba(90,60,20,.35); }
+  .clasp::after { content: ""; position: absolute; inset: -6px; border-radius: 16px; box-shadow: 0 0 28px 8px rgba(240,207,124,.85); opacity: 0; pointer-events: none; }
   .clasp svg { width: 20px; height: 30px; }
   .key { position: absolute; z-index: 5; left: calc(100% - 20px); top: calc(17% + 15px); width: 112px; height: 36px; opacity: 0; pointer-events: none; }
   .key svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 3px 4px rgba(0,0,0,.5)) drop-shadow(0 0 10px rgba(240,207,124,.75)); transform-origin: 0 50%; }
   .burst { position: absolute; z-index: 6; right: 10px; top: calc(17% + 33px); width: 0; height: 0; pointer-events: none; }
   .burst i { position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: #fff3cf; box-shadow: 0 0 10px 2px #f0cf7c; opacity: 0; }
 
-  .gate.verifying .clasp { animation: clasp-wait 1s ease-in-out infinite; }
-  @keyframes clasp-wait { 50% { box-shadow: 0 8px 18px rgba(0,0,0,.55), 0 0 22px 4px rgba(240,207,124,.55), inset 0 1px 0 rgba(255,255,255,.7); } }
+  .gate.verifying .clasp::after { animation: glow-wait 1s ease-in-out infinite; }
+  @keyframes glow-wait { 50% { opacity: .6; } }
   .gate.denied .clasp { animation: shake .5s cubic-bezier(.36,.07,.19,.97) both; }
   @keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
 
-  /* ouverture : clé → serrure → fermoir → couverture → page */
+  /* ouverture : clé → serrure → fermoir → couverture → page (transform/opacity uniquement) */
+  .gate.unlock { cursor: pointer; }
   .gate.unlock .gate-form { pointer-events: none; }
-  .gate.unlock .key { animation: key-in .75s cubic-bezier(.2,.8,.2,1) forwards, fade-out .3s ease 1.45s forwards; }
-  .gate.unlock .key svg { animation: key-turn .45s ease-in-out .8s forwards; }
-  @keyframes key-in { 0% { opacity: 0; transform: translate(140px, 90px) rotate(-30deg) scale(1.3); } 55% { opacity: 1; } 75% { transform: translate(10px, 0) rotate(0); } 100% { opacity: 1; transform: translate(0, 0); } }
+  .gate.unlock .cover, .gate.unlock .key, .gate.unlock .clasp { will-change: transform, opacity; }
+  .gate.unlock .key { animation: key-in .65s cubic-bezier(.2,.8,.2,1) forwards, fade-out .25s ease 1.25s forwards; }
+  .gate.unlock .key svg { animation: key-turn .4s ease-in-out .7s forwards; }
+  @keyframes key-in { 0% { opacity: 0; transform: translate3d(140px, 90px, 0) rotate(-30deg) scale(1.3); } 55% { opacity: 1; } 75% { transform: translate3d(10px, 0, 0) rotate(0); } 100% { opacity: 1; transform: translate3d(0, 0, 0); } }
   @keyframes key-turn { to { transform: scaleY(.28); } }
-  .gate.unlock .clasp { animation: clasp-glow .4s ease .9s both, clasp-open .5s cubic-bezier(.5,0,.75,0) 1.3s forwards; }
-  @keyframes clasp-glow { to { box-shadow: 0 8px 18px rgba(0,0,0,.55), 0 0 30px 8px rgba(240,207,124,.8), inset 0 1px 0 rgba(255,255,255,.8); } }
-  @keyframes clasp-open { to { transform: translate(34px, -10px) rotate(18deg); opacity: 0; } }
-  .gate.unlock .burst i { animation: burst .8s ease-out 1s forwards; }
-  @keyframes burst { 0% { opacity: 1; transform: rotate(var(--a)) translateX(0) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateX(56px) scale(.3); } }
-  .gate.unlock .cover { animation: cover-open 1.25s cubic-bezier(.65,.02,.3,1) 1.6s forwards; }
-  @keyframes cover-open { to { transform: rotateY(-172deg); } }
-  .gate.unlock .page-under > * { animation: page-in .7s ease-out forwards; }
-  .gate.unlock .page-under .illum { animation-delay: 2.15s; }
-  .gate.unlock .page-under .pg-title { animation-delay: 2.35s; }
-  .gate.unlock .page-under .pg-lines { animation-delay: 2.5s; }
-  @keyframes page-in { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
-  .gate.unlock .gate-inner { animation: gate-zoom .7s cubic-bezier(.5,0,.75,0) 3.15s forwards; }
-  @keyframes gate-zoom { to { transform: scale(1.12); opacity: 0; filter: blur(6px); } }
-  .gate.unlock { animation: fade-out .6s ease 3.3s forwards; }
+  .gate.unlock .clasp::after { animation: glow-on .35s ease .75s forwards; }
+  @keyframes glow-on { to { opacity: 1; } }
+  .gate.unlock .clasp { animation: clasp-open .45s cubic-bezier(.5,0,.75,0) 1.1s forwards; }
+  @keyframes clasp-open { to { transform: translate3d(34px, -10px, 0) rotate(18deg); opacity: 0; } }
+  .gate.unlock .burst i { animation: burst .75s ease-out .85s forwards; }
+  @keyframes burst { 0% { opacity: 1; transform: rotate(var(--a)) translate3d(0, 0, 0) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translate3d(56px, 0, 0) scale(.3); } }
+  .gate.unlock .cover { animation: cover-open 1.1s cubic-bezier(.65,.02,.3,1) 1.35s forwards; }
+  @keyframes cover-open { from { transform: rotateY(0); } to { transform: rotateY(-172deg); } }
+  /* sécurité Safari : on échange les faces au passage des 90° */
+  .gate.unlock .cover-front { animation: face-out .01s linear 1.9s forwards; }
+  .gate.unlock .cover-back { opacity: 0; animation: face-in .01s linear 1.9s forwards; }
+  @keyframes face-out { to { opacity: 0; } }
+  @keyframes face-in { to { opacity: 1; } }
+  .gate.unlock .page-under > * { animation: page-in .6s ease-out forwards; }
+  .gate.unlock .page-under .illum { animation-delay: 1.85s; }
+  .gate.unlock .page-under .pg-title { animation-delay: 2.05s; }
+  .gate.unlock .page-under .pg-lines { animation-delay: 2.2s; }
+  @keyframes page-in { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+  .gate.unlock .gate-inner { animation: gate-zoom .55s cubic-bezier(.5,0,.75,0) 2.75s forwards; }
+  @keyframes gate-zoom { to { transform: scale(1.1); opacity: 0; } }
+  .gate.unlock { animation: fade-out .5s ease 2.9s forwards; }
   @keyframes fade-out { to { opacity: 0; } }
+  .skip-hint { position: fixed; left: 0; right: 0; bottom: max(14px, var(--sab)); text-align: center; font-size: 12px; color: rgba(220,205,240,.55); opacity: 0; pointer-events: none; }
+  .gate.unlock .skip-hint { animation: page-in .4s ease .9s forwards; }
+
+  /* iPad et grands écrans */
+  @media (min-width: 700px) and (min-height: 700px) {
+    .book { width: min(100%, 580px); }
+    .book::before { inset: 9px -9px -10px 18px; }
+    .cover { min-height: min(calc(var(--vvh) - 110px), 800px); }
+    .cover-front { padding: 56px 48px 42px 64px; gap: 16px; }
+    .cover-head { gap: 16px; }
+    .frame { inset: 18px 18px 18px 40px; }
+    .corner { width: 40px; height: 40px; }
+    .emblem { width: 116px; height: 116px; }
+    .emblem .ring.inner { inset: 20px; }
+    .emblem svg { width: 38px; height: 38px; }
+    .cover-title { font-size: 52px; }
+    .cover-sub { font-size: 12px; }
+    .cover-text { font-size: 18.5px; max-width: 380px; }
+    .gate-form { max-width: 390px; padding: 18px; gap: 11px; }
+    .clasp { width: 66px; height: 86px; right: -21px; border-radius: 14px 8px 8px 14px; }
+    .clasp svg { width: 26px; height: 38px; }
+    .key { width: 146px; height: 47px; left: calc(100% - 26px); top: calc(17% + 20px); }
+    .burst { right: 12px; top: calc(17% + 43px); }
+    .page-under .illum { font-size: 140px; }
+    .page-under .pg-title { font-size: 30px; }
+  }
+  /* iPhone en paysage : couverture à l'italienne, formulaire à droite */
+  @media (orientation: landscape) and (max-height: 540px) {
+    .gate { padding-top: max(10px, var(--sat)); padding-bottom: max(10px, var(--sab)); }
+    .book { width: min(100%, 760px); }
+    .cover { min-height: 0; }
+    .cover-front { flex-direction: row; align-items: center; gap: 22px; padding: 22px 58px 22px 40px; }
+    .cover-head { flex: 1 1 0; gap: 8px; }
+    .gate-form { flex: 1 1 0; max-width: 340px; margin-top: 0; }
+    .emblem { width: 58px; height: 58px; }
+    .emblem svg { width: 20px; height: 20px; }
+    .cover-title { font-size: 30px; }
+    .cover-text { font-size: 14.5px; }
+    .clasp { top: 12%; }
+    .key { top: calc(12% + 15px); }
+    .burst { top: calc(12% + 33px); }
+    .page-under .illum { font-size: 70px; }
+  }
+
   .app.reveal { animation: app-in .7s ease-out both; }
   @keyframes app-in { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
 
@@ -727,6 +818,7 @@
 
 <section class="gate" id="gate" aria-labelledby="gateTitle">
   <div class="motes" aria-hidden="true"><i style="left:8%;--dx:30px;animation-duration:11s;animation-delay:0s"></i><i style="left:18%;--dx:-20px;animation-duration:14s;animation-delay:3s"></i><i style="left:27%;--dx:25px;animation-duration:9s;animation-delay:6s"></i><i style="left:38%;--dx:-30px;animation-duration:13s;animation-delay:1.5s"></i><i style="left:49%;--dx:15px;animation-duration:10s;animation-delay:4.5s"></i><i style="left:58%;--dx:-25px;animation-duration:12s;animation-delay:7s"></i><i style="left:67%;--dx:35px;animation-duration:15s;animation-delay:2s"></i><i style="left:76%;--dx:-15px;animation-duration:9.5s;animation-delay:5s"></i><i style="left:85%;--dx:20px;animation-duration:13s;animation-delay:8s"></i><i style="left:93%;--dx:-30px;animation-duration:11s;animation-delay:3.5s"></i><i style="left:33%;--dx:10px;animation-duration:16s;animation-delay:9s"></i><i style="left:72%;--dx:-10px;animation-duration:10.5s;animation-delay:10s"></i></div>
+  <div class="skip-hint" aria-hidden="true">Touche l'écran pour passer</div>
   <div class="gate-inner">
     <div class="book" id="book">
       <div class="page-under" aria-hidden="true">
@@ -737,6 +829,7 @@
       <div class="cover" id="cover">
         <div class="cover-face cover-front">
           <div class="frame"><svg class="corner tl" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M2 14V2h12"/><path d="M6 18V6h12"/><path d="M2 2l7 7"/><circle cx="10.5" cy="10.5" r="1.6" fill="currentColor"/></svg><svg class="corner tr" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M2 14V2h12"/><path d="M6 18V6h12"/><path d="M2 2l7 7"/><circle cx="10.5" cy="10.5" r="1.6" fill="currentColor"/></svg><svg class="corner bl" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M2 14V2h12"/><path d="M6 18V6h12"/><path d="M2 2l7 7"/><circle cx="10.5" cy="10.5" r="1.6" fill="currentColor"/></svg><svg class="corner br" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M2 14V2h12"/><path d="M6 18V6h12"/><path d="M2 2l7 7"/><circle cx="10.5" cy="10.5" r="1.6" fill="currentColor"/></svg></div>
+          <div class="cover-head">
           <div class="emblem" aria-hidden="true">
             <span class="ring"></span><span class="ring runes"></span><span class="ring inner"></span>
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.2 7.3 7.3 2.2-7.3 2.2L12 21.5l-2.2-7.3L2.5 12l7.3-2.2z"/></svg>
@@ -745,6 +838,7 @@
           <div class="cover-sub">1.3 Flash<br>Grimoire des histoires</div>
           <div class="cover-rule" aria-hidden="true">✦</div>
           <p class="cover-text">Glisse ta clé F.S.M AI dans la serrure pour ouvrir le grimoire et réveiller le narrateur.</p>
+          </div>
           <form class="gate-form" id="gateForm" autocomplete="off" novalidate>
             <label class="gate-label" for="gateKey">Ma clé F.S.M AI</label>
             <div class="key-row">
@@ -956,6 +1050,23 @@
         </label>
       </div>
       <div class="group">
+        <div class="group-title">Illustrations</div>
+        <label class="toggle">
+          <span>Illustrer le récit<small>Le narrateur ajoute des images libres de droits aux moments clés.</small></span>
+          <input type="checkbox" id="images">
+        </label>
+        <div class="field" style="margin-top:6px">
+          <label for="imageStyle">Style des images</label>
+          <select id="imageStyle">
+            <option value="art">Œuvres d'art et gravures</option>
+            <option value="illus">Illustrations</option>
+            <option value="photo">Photographies</option>
+            <option value="all">Tous les styles</option>
+          </select>
+          <p class="hint">Images issues d'Openverse (Wikimedia Commons, musées, Flickr…) sous licences libres, avec le crédit de l'auteur. Touche une image pour l'agrandir, en changer ou la retirer.</p>
+        </div>
+      </div>
+      <div class="group">
         <div class="group-title">Saisie</div>
         <label class="toggle">
           <span>Touche Entrée = envoyer<small>Désactivé : Entrée ajoute un retour à la ligne.</small></span>
@@ -984,6 +1095,18 @@
       </div>
     </div>
   </section>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Illustration">
+  <button class="icon-btn lb-close" type="button" id="lbClose" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <img id="lbImg" alt="">
+  <div class="lb-cap" id="lbCap"></div>
+  <div class="lb-credit" id="lbCredit"></div>
+  <div class="lb-actions">
+    <button class="btn small" type="button" id="lbNext">Autre image</button>
+    <a class="btn small" id="lbSource" href="#" target="_blank" rel="noopener noreferrer">Voir la source</a>
+    <button class="btn small danger" type="button" id="lbRemove">Retirer</button>
+  </div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1037,6 +1160,15 @@ CONTINUITÉ ET MÉMOIRE
 - [DIRECTION DU JOUEUR — hors-jeu] … : consigne de mise en scène. Applique-la directement dans la narration, sans la commenter ni la mentionner.
 - [Jet de d20 : N] : résultat d'un dé pour l'action incertaine du joueur. 1 = échec critique, 2 à 7 = échec, 8 à 13 = réussite partielle ou avec un prix, 14 à 19 = réussite, 20 = réussite éclatante. Raconte le résultat de façon narrative, sans afficher de chiffres.
 - Un texte sans marque est une action et/ou une réplique du personnage du joueur : interprète-le naturellement.`;
+
+  const IMAGE_RULES = `ILLUSTRATIONS
+- Quand une nouvelle scène commence, ou qu'un lieu marquant, une créature ou un objet important apparaît pour la première fois, termine ta réponse par une ligne séparée contenant une balise d'illustration :
+[[IMAGE: mots-clés en anglais | courte légende en français]]
+- Mots-clés : 2 à 5 mots anglais décrivant un sujet visuel simple et générique, facile à trouver dans une banque d'images libres (lieu, paysage, ambiance, époque, créature, objet). Jamais de noms propres, de texte, ni de contenu choquant ou explicite.
+- Exemple : [[IMAGE: medieval tavern candlelight | La taverne du Corbeau, un soir d'orage]]
+- Une seule balise au maximum par réponse, et seulement quand l'image enrichit vraiment le récit (environ une réponse sur trois). Mets-en toujours une dans la scène d'ouverture. Jamais dans un message hors-jeu. Ne parle jamais de la balise dans le récit.`;
+  const OPENVERSE_URL = "https://api.openverse.org/v1/images/";
+  const IMAGE_CATEGORIES = { art: "digitized_artwork,illustration", illus: "illustration", photo: "photograph", all: "" };
 
   const SUMMARY_SYSTEM = "Tu es l'archiviste de continuité d'un roleplay. Produis un résumé compact, factuel et durable (maximum 700 mots) qui préserve uniquement les informations utiles aux prochaines scènes : personnages et traits, relations, chronologie, lieux, faits établis, ce que sait chaque personnage (dont le personnage du joueur), objets/ressources, blessures, promesses, secrets révélés, décisions, conséquences et intrigues ouvertes. Distingue les faits des suppositions. Ne crée rien. Intègre et corrige le résumé précédent si fourni. Ignore les échanges hors-jeu sauf s'ils modifient l'histoire. Réponds uniquement par le résumé.";
 
@@ -1219,8 +1351,21 @@ CONTINUITÉ ET MÉMOIRE
   }
   const DLG_RE = /^\s*(—|–|-\s|«|“|"|‘)/;
   const OOC_RE = /^\s*\(\(/;
-  function renderStory(src) {
-    const text = String(src).replace(/\r\n?/g, "\n");
+  const IMG_TAG_RE = /\[\[\s*IMAGE\s*:\s*([^\]|]+?)\s*(?:\|\s*([^\]]*?))?\s*\]\]/i;
+  function parseImageTag(text) {
+    const m = String(text).match(IMG_TAG_RE);
+    if (!m) return null;
+    const q = m[1].replace(/[^\w\s'-]/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
+    return q ? { q, caption: (m[2] || "").trim().slice(0, 140) } : null;
+  }
+  function stripImageTags(t, streaming) {
+    let s = String(t).replace(/\n?[ \t]*\[\[\s*IMAGE\s*:[^\]]*\]\]/gi, "");
+    // pendant l'écriture : on masque une balise commencée mais pas encore fermée
+    if (streaming) s = s.replace(/\[(?:\[(?:\s*I(?:M(?:A(?:G(?:E[^\]\n]*)?)?)?)?)?)?$/i, "");
+    return s.replace(/\s+$/, "");
+  }
+  function renderStory(src, streaming) {
+    const text = stripImageTags(String(src).replace(/\r\n?/g, "\n"), streaming);
     if (text.indexOf("((") < 0) return renderBlocks(text);
     // Les passages hors-jeu (( … )) forment un encart distinct, même sur plusieurs paragraphes.
     let out = "", last = 0, m;
@@ -1307,7 +1452,7 @@ CONTINUITÉ ET MÉMOIRE
      ===================================================================== */
   const defaultSettings = () => ({
     engine: DEFAULT_ENGINE, temperature: "0.85", stream: true, enterSends: !isTouch,
-    textSize: "m", font: "book", dialogues: true, rememberKey: true
+    textSize: "m", font: "book", dialogues: true, rememberKey: true, images: true, imageStyle: "art"
   });
   let settings = Object.assign(defaultSettings(), store.get("settings", {}));
   settings.engine = DEFAULT_ENGINE; // moteur fixe : non modifiable
@@ -1352,6 +1497,7 @@ CONTINUITÉ ET MÉMOIRE
     c.messages = c.messages.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string");
     c.messages.forEach((m) => {
       if (!m.id) m.id = uid();
+      delete m.imgLoading;
       if (m.alts && (!Array.isArray(m.alts) || m.alts.length < 2)) { delete m.alts; delete m.altIndex; }
       if (m.alts) m.altIndex = Math.min(Math.max(0, m.altIndex | 0), m.alts.length - 1);
     });
@@ -1446,6 +1592,7 @@ CONTINUITÉ ET MÉMOIRE
       if (firstA && firstA.id === m.id) el.classList.add("opening");
     }
     el.appendChild(b);
+    if (m.role === "assistant" && settings.images && (m.image || m.imgLoading)) el.appendChild(figureEl(m));
     if (m.partial) {
       const n = document.createElement("div");
       n.className = "note"; n.textContent = "Réponse interrompue";
@@ -1524,6 +1671,10 @@ CONTINUITÉ ET MÉMOIRE
     chat.appendChild(frag);
     renderTail();
     updatePersist();
+    if (settings.images) conv.messages.slice(-4).forEach((m) => {
+      if (m.imgLoading) delete m.imgLoading;
+      if (m.role === "assistant" && m.imgReq && !m.image && !m.imgFailed && !m.imgHidden) attachImage(conv, m);
+    });
     requestAnimationFrame(() => {
       if (conv.messages.length) scrollToBottom(true);
       else { chat.scrollTop = 0; stick = true; $("toBottom").classList.remove("show"); }
@@ -1610,6 +1761,7 @@ CONTINUITÉ ET MÉMOIRE
     if (sheet.length) parts.push("FICHE DE L'HISTOIRE (définie par le joueur)\n" + sheet.join("\n\n"));
     const sum = currentSummary(c);
     if (sum.text.trim()) parts.push("MÉMOIRE CONDENSÉE DE L'HISTOIRE (faits établis à respecter)\n" + sum.text.trim());
+    if (settings.images) parts.push(IMAGE_RULES);
     return parts.join("\n\n");
   }
   function buildContext(c) {
@@ -1716,7 +1868,7 @@ CONTINUITÉ ET MÉMOIRE
       g.el.classList.add("writing");
     }
     b.querySelectorAll(".caret").forEach((x) => x.remove());
-    patchBlocks(b, renderStory(softClose(g.text.slice(0, g.shown))));
+    patchBlocks(b, renderStory(softClose(g.text.slice(0, g.shown)), true));
     placeCaret(b);
     scrollToBottom(false);
   }
@@ -1821,7 +1973,12 @@ CONTINUITÉ ET MÉMOIRE
       if (text.trim()) {
         const m = { id: uid(), role: "assistant", content: text, ts: Date.now() };
         if (aborted || error) m.partial = true;
-        if (opts.alts && opts.alts.length) { m.alts = opts.alts.concat(text).slice(-MAX_ALTS); m.altIndex = m.alts.length - 1; }
+        if (opts.alts && opts.alts.length) {
+          m.alts = opts.alts.concat(text).slice(-MAX_ALTS); m.altIndex = m.alts.length - 1;
+          const r = opts.restore;
+          if (r) { m.altImgs = Object.assign({}, r.altImgs || {}); m.altImgs[r.alts ? r.altIndex : 0] = { image: r.image || null, imgReq: r.imgReq || null, imgHidden: !!r.imgHidden }; }
+        }
+        if (!aborted && !error) { const tag = parseImageTag(text); if (tag) m.imgReq = tag; }
         c.messages.push(m);
         shown = m;
         saveConv(c);
@@ -1837,6 +1994,7 @@ CONTINUITÉ ET MÉMOIRE
           el.replaceWith(done);
         } else el.remove();
         chat.removeAttribute("aria-busy");
+        if (shown && shown.imgReq && !shown.image && !shown.imgHidden && settings.images) attachImage(c, shown);
         if (error) showError(error); else renderTail();
         updatePersist();
         scrollToBottom(false);
@@ -1846,6 +2004,146 @@ CONTINUITÉ ET MÉMOIRE
     }
     if (!error && !aborted) maybeCompact(c, false);
   }
+  /* ---------- Illustrations (Openverse) ---------- */
+  const imgCache = new Map();
+  function licenseLabel(im) {
+    const l = (im.license || "").toLowerCase();
+    if (l === "cc0") return "CC0";
+    if (l === "pdm") return "Domaine public";
+    return l ? "CC " + l.toUpperCase() + (im.licenseVersion ? " " + im.licenseVersion : "") : "";
+  }
+  function creditText(im) {
+    const title = (im.title || "").length > 60 ? im.title.slice(0, 57) + "…" : (im.title || "");
+    return [title, im.creator ? "par " + im.creator : "", licenseLabel(im), im.source ? "via " + im.source : ""].filter(Boolean).join(" · ");
+  }
+  async function searchImages(q) {
+    const key = settings.imageStyle + "|" + q.toLowerCase();
+    if (imgCache.has(key)) return imgCache.get(key).slice();
+    const cat = IMAGE_CATEGORIES[settings.imageStyle] ?? IMAGE_CATEGORIES.art;
+    const attempts = cat ? [{ category: cat }, {}] : [{}];
+    let out = [];
+    for (const extra of attempts) {
+      const params = new URLSearchParams(Object.assign({ q, page_size: "20", mature: "false" }, extra));
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 10000);
+      let res;
+      try { res = await fetch(OPENVERSE_URL + "?" + params.toString(), { signal: ctrl.signal }); }
+      catch (_) { clearTimeout(timer); continue; }
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const data = await res.json().catch(() => null);
+      const list = (data && Array.isArray(data.results) ? data.results : [])
+        .filter((r) => r && r.url && !r.mature && !(Array.isArray(r.unstable__sensitivity) && r.unstable__sensitivity.length) && (!r.width || r.width >= 400))
+        .map((r) => ({
+          id: r.id, title: r.title || "", creator: r.creator || "", license: r.license || "", licenseVersion: r.license_version || "",
+          licenseUrl: r.license_url || "", source: r.source || r.provider || "", landing: r.foreign_landing_url || "",
+          url: r.url, thumb: r.thumbnail || r.url, w: r.width || 0, h: r.height || 0
+        }));
+      if (list.length) { out = list; break; }
+    }
+    // on privilégie les images en largeur, avec un peu de variété
+    out.sort((a, b) => ((b.w >= b.h) - (a.w >= a.h)));
+    const head = out.slice(0, 6).sort(() => Math.random() - 0.5);
+    out = head.concat(out.slice(6)).slice(0, 12);
+    imgCache.set(key, out);
+    return out.slice();
+  }
+  function figureEl(m) {
+    const f = document.createElement("figure");
+    f.className = "illus";
+    if (m.imgLoading || !m.image) {
+      f.classList.add("loading");
+      f.innerHTML = '<div class="illus-frame"><div class="illus-ph"><span class="orb" aria-hidden="true"><i></i><i></i><i></i></span><span>Le narrateur cherche une illustration…</span></div></div>';
+      return f;
+    }
+    const im = m.image;
+    f.innerHTML = '<button type="button" class="illus-frame" data-act="zoom" aria-label="Agrandir l\'illustration"><img alt="" decoding="async"></button><figcaption>' +
+      (im.caption ? '<span class="cap">' + escapeHtml(im.caption) + "</span>" : "") + '<span class="credit">' + escapeHtml(creditText(im)) + "</span></figcaption>";
+    const img = f.querySelector("img");
+    img.alt = im.caption || im.title || "Illustration";
+    img.onload = () => f.classList.add("loaded");
+    img.onerror = () => {
+      if (im.url && img.src !== im.url) { img.src = im.url; return; }
+      if (m.imgPool && m.imgPool.length) nextImage(m, true); else f.remove();
+    };
+    img.src = im.thumb || im.url;
+    return f;
+  }
+  function refreshFigure(m) {
+    if (!conv || !conv.messages.includes(m)) return;
+    const el = chat.querySelector('.msg[data-id="' + m.id + '"]');
+    if (!el) return;
+    const old = el.querySelector(".illus");
+    const show = settings.images && (m.image || m.imgLoading);
+    if (!show) { if (old) old.remove(); return; }
+    const f = figureEl(m);
+    if (old) old.replaceWith(f); else el.querySelector(".bubble").after(f);
+    if (stick) scrollToBottom(false);
+  }
+  async function attachImage(c, m) {
+    if (!m.imgReq || m.imgLoading) return;
+    m.imgLoading = true;
+    if (conv === c) refreshFigure(m);
+    let results = [];
+    try { results = await searchImages(m.imgReq.q); } catch (_) {}
+    m.imgLoading = false;
+    if (results.length) {
+      m.image = Object.assign({}, results[0], { caption: m.imgReq.caption });
+      m.imgPool = results.slice(1);
+      delete m.imgFailed;
+    } else {
+      m.imgFailed = true;   // pas d'image pertinente : le récit continue sans
+    }
+    if (c.messages.includes(m)) saveConv(c, false);
+    if (conv === c) refreshFigure(m);
+  }
+  function nextImage(m, silent) {
+    if (!m.imgPool || !m.imgPool.length) { if (!silent) toast("Pas d'autre image pour cette scène."); return false; }
+    const prev = m.image;
+    m.image = Object.assign({}, m.imgPool.shift(), { caption: prev ? prev.caption : (m.imgReq && m.imgReq.caption) || "" });
+    if (prev && !silent) m.imgPool.push(prev);
+    saveConv(conv, false);
+    refreshFigure(m);
+    return true;
+  }
+  /* visionneuse */
+  let lbMsg = null;
+  function fillLightbox() {
+    const im = lbMsg && lbMsg.image;
+    if (!im) { closeLightbox(); return; }
+    const img = $("lbImg");
+    img.onerror = () => { if (img.src !== im.thumb) img.src = im.thumb; };
+    img.src = im.url || im.thumb;
+    img.alt = im.caption || im.title || "Illustration";
+    $("lbCap").textContent = im.caption || "";
+    $("lbCredit").textContent = creditText(im);
+    $("lbSource").href = im.landing || im.url;
+    $("lbSource").hidden = !(im.landing || im.url);
+    $("lbNext").disabled = !(lbMsg.imgPool && lbMsg.imgPool.length);
+  }
+  function openLightbox(m) {
+    lbMsg = m;
+    if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+    fillLightbox();
+    $("lightbox").classList.add("open");
+    app.inert = true;
+  }
+  function closeLightbox() {
+    $("lightbox").classList.remove("open");
+    $("lbImg").removeAttribute("src");
+    lbMsg = null;
+    if (!openSheetName && !root.classList.contains("locked")) app.inert = false;
+  }
+  $("lbClose").addEventListener("click", closeLightbox);
+  $("lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox" || e.target.id === "lbImg") closeLightbox(); });
+  $("lbNext").addEventListener("click", () => { if (lbMsg && nextImage(lbMsg)) fillLightbox(); });
+  $("lbRemove").addEventListener("click", () => {
+    if (!lbMsg) return;
+    delete lbMsg.image; delete lbMsg.imgPool; lbMsg.imgHidden = true;
+    saveConv(conv, false); refreshFigure(lbMsg); closeLightbox(); toast("Illustration retirée");
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lbMsg) closeLightbox(); });
+
   function stopGen() {
     if (!gen) return Promise.resolve();
     const p = gen.done;
@@ -1878,7 +2176,7 @@ CONTINUITÉ ET MÉMOIRE
       { role: "system", content: SUMMARY_SYSTEM },
       ...(sheet ? [{ role: "user", content: "Fiche permanente de l'histoire (pour information, ne pas la recopier) :" + sheet }] : []),
       ...(sum.text.trim() ? [{ role: "user", content: "Résumé précédent à mettre à jour :\n" + sum.text.trim() }] : []),
-      { role: "user", content: "Échanges à archiver :\n" + older.map((m) => speakerLabel(m, c) + " : " + m.content).join("\n\n") }
+      { role: "user", content: "Échanges à archiver :\n" + older.map((m) => speakerLabel(m, c) + " : " + stripImageTags(m.content)).join("\n\n") }
     ];
     compacting.add(c.id);
     updateMemIndicator();
@@ -2038,7 +2336,10 @@ CONTINUITÉ ET MÉMOIRE
     setGateBtn("Le grimoire s'ouvre…", true);
     gateEl.scrollTop = 0;
     gateEl.classList.add("unlock");   // clé → serrure → fermoir → couverture → page
-    setTimeout(finish, 3900);
+    let done = false;
+    const end = () => { if (done) return; done = true; clearTimeout(timer); gateEl.removeEventListener("click", end); finish(); };
+    const timer = setTimeout(end, 3400);
+    setTimeout(() => gateEl.addEventListener("click", end), 300);   // toucher l'écran passe l'animation
   });
   async function signOut(msg) {
     await stopGen();
@@ -2055,7 +2356,7 @@ CONTINUITÉ ET MÉMOIRE
 
   function dropOldAlts() {
     const last = conv.messages[conv.messages.length - 1];
-    if (last && last.alts) { delete last.alts; delete last.altIndex; replaceMessageEl(last); }
+    if (last && last.alts) { delete last.alts; delete last.altIndex; delete last.altImgs; replaceMessageEl(last); }
   }
 
   function pushUserMessage(m) {
@@ -2155,7 +2456,8 @@ CONTINUITÉ ET MÉMOIRE
     const id = el && el.dataset.id;
     const m = id ? conv.messages.find((x) => x.id === id) : null;
     switch (act) {
-      case "copy": if (m) copyText(m.role === "user" ? m.content : m.content); break;
+      case "copy": if (m) copyText(m.role === "user" ? m.content : stripImageTags(m.content)); break;
+      case "zoom": if (m && m.image) openLightbox(m); break;
       case "regen": if (m) regenerate(m.id); break;
       case "regen-last": { const last = conv.messages[conv.messages.length - 1]; if (last && last.role === "assistant") regenerate(last.id, true); break; }
       case "alt-prev": if (m) switchAlt(m, -1); break;
@@ -2177,11 +2479,20 @@ CONTINUITÉ ET MÉMOIRE
     if (!m.alts) return;
     const i = Math.min(Math.max(0, m.altIndex + delta), m.alts.length - 1);
     if (i === m.altIndex) return;
+    m.altImgs = m.altImgs || {};
+    m.altImgs[m.altIndex] = { image: m.image || null, imgReq: m.imgReq || null, imgHidden: !!m.imgHidden };
     m.altIndex = i;
     m.content = m.alts[i];
     delete m.partial;
+    const saved = m.altImgs[i];
+    m.image = saved ? saved.image : null;
+    m.imgReq = saved ? saved.imgReq : parseImageTag(m.content);
+    if (saved && saved.imgHidden) m.imgHidden = true; else delete m.imgHidden;
+    delete m.imgPool; delete m.imgFailed;
+    if (!m.image) delete m.image;
     saveConv(conv, false);
     replaceMessageEl(m);
+    if (m.imgReq && !m.image && !m.imgHidden && settings.images) attachImage(conv, m);
     const el = chat.querySelector('.msg[data-id="' + m.id + '"]');
     if (el) el.classList.add("show-actions", "swap-in");
   }
@@ -2251,12 +2562,17 @@ CONTINUITÉ ET MÉMOIRE
     m.content = text;
     delete m.partial;
     if (m.alts) m.alts[m.altIndex] = text;
+    if (m.role === "assistant") {
+      const tag = parseImageTag(text);
+      if (tag && (!m.imgReq || m.imgReq.q !== tag.q)) { m.imgReq = tag; delete m.image; delete m.imgPool; delete m.imgFailed; delete m.imgHidden; }
+    }
     if (m.kind === "direction") delete m.label;
     if (resend) {
       truncateFrom(conv, idx + 1);
       saveConv(conv); closeSheet(); updateHeader(); renderAll(); generate();
     } else {
       autoTitle(conv); saveConv(conv); closeSheet(); updateHeader(); replaceMessageEl(m); toast("Modifié");
+      if (m.imgReq && !m.image && !m.imgHidden && settings.images) attachImage(conv, m);
     }
   }
   $("editSave").addEventListener("click", () => saveEdit(false));
@@ -2506,7 +2822,10 @@ CONTINUITÉ ET MÉMOIRE
     conv.messages.forEach((m) => {
       if (m.kind === "direction" || m.kind === "ooc") return;
       if (m.role === "user") parts.push("> **" + who + " :** " + m.content.replace(/\n/g, "\n> "), "");
-      else if (!/^\s*\(\(/.test(m.content)) parts.push(m.content, "");
+      else if (!/^\s*\(\(/.test(m.content)) {
+        parts.push(stripImageTags(m.content), "");
+        if (m.image) parts.push("![" + (m.image.caption || m.image.title || "Illustration").replace(/[\[\]]/g, "") + "](" + m.image.url + ")", "_" + creditText(m.image) + "_", "");
+      }
     });
     deliverFile(safeName(conv.title) + ".md", parts.join("\n"), "text/markdown");
   });
@@ -2568,6 +2887,9 @@ CONTINUITÉ ET MÉMOIRE
     $("storyFont").value = settings.font;
     $("textSize").value = settings.textSize;
     $("dialogues").checked = !!settings.dialogues;
+    $("images").checked = !!settings.images;
+    $("imageStyle").value = settings.imageStyle;
+    $("imageStyle").disabled = !settings.images;
     $("enterSends").checked = !!settings.enterSends;
     updateKeyMasked();
     updateEngineInfo();
@@ -2585,6 +2907,12 @@ CONTINUITÉ ET MÉMOIRE
   $("stream").addEventListener("change", (e) => { settings.stream = e.target.checked; saveSettings(); });
   $("storyFont").addEventListener("change", (e) => { settings.font = e.target.value; saveSettings(); applySettings(); });
   $("textSize").addEventListener("change", (e) => { settings.textSize = e.target.value; saveSettings(); applySettings(); });
+  $("images").addEventListener("change", (e) => {
+    settings.images = e.target.checked; saveSettings();
+    $("imageStyle").disabled = !settings.images;
+    const keep = chat.scrollTop; renderAll(); requestAnimationFrame(() => { chat.scrollTop = keep; });
+  });
+  $("imageStyle").addEventListener("change", (e) => { settings.imageStyle = e.target.value; saveSettings(); });
   $("dialogues").addEventListener("change", (e) => {
     settings.dialogues = e.target.checked; saveSettings();
     const keepScroll = chat.scrollTop; renderAll(); requestAnimationFrame(() => { chat.scrollTop = keepScroll; });
